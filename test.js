@@ -12,19 +12,6 @@
                };
 
     ajaxLoad = function(url, callback) {
-        callback([{
-    "id" : "1", 
-    "msg"   : "hi",
-    "tid" : "2013-05-05 23:35",
-    "link": "hello1@email.se"
-},
-{
-    "id" : "2", 
-    "msg"   : "there",
-    "tid" : "2013-05-05 23:45",
-    "link": "hello2@email.se"
-}]);
-        return;
         if (url && typeof (url) !== 'string') {
             return;
         }
@@ -43,7 +30,6 @@
 
     function Autocomplete(urlService, options, customFunctions) {
         if (typeof(urlService) !== 'string' || !urlService) {
-            console.log('no url');
             return;
         }
         this.urlService = urlService;
@@ -89,7 +75,7 @@
     };
 
     Autocomplete.prototype.createResultList = function() {
-        if (this.options.resultList) {
+        if (typeof(this.options.resultList) === 'object' && this.options.resultList.tagName) {
             this.resultList = this.options.resultList;
             return;
         }
@@ -105,8 +91,8 @@
     Autocomplete.prototype.addEvents = function(item) {
         item.addEventListener('keypress', function(e) {
             this.inputActive = item;
-            clearTimeout(this.timeout);
-            this.timeout = setTimeout(function() {
+            clearTimeout(this.timeoutFn);
+            this.timeoutFn = setTimeout(function() {
                 this.checkNeedSuggest(item, e);
             }.bind(this), this.options.delayCheck);
         }.bind(this));
@@ -166,6 +152,7 @@
                 }
 
                 if (hide) {
+                    clearTimeout(this.timeoutFn);
                     this.resultList.style.display = 'none';
                     document.body.removeEventListener('click', listener);
                 }
