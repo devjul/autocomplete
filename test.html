@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+
+		</style>
+	</head>
+	<body>
+		<section>
+			<div>
+				<input type="text" name="text1" value="text1" />
+				<input type="text" name="text2" value="text2" />
+			</div>
+			<p contenteditable>
+				Test
+			</p>
+			<ul id="timeline">
+			</ul>
+		</section>
+
+		<footer>
+			<p>
+				&copy; devjul - 2014
+			</p>
+		</footer>
+
+		<script src="test.js"></script>
+		<script>
+		'use strict';
+
+		var test = new Autocomplete("test", {
+			elements: document.querySelectorAll('input'),
+			resultList: document.getElementById('timeline')
+		}, function(li, item) {
+			li.innerHTML = 'add ' + item.msg + item.id;
+
+            li.addEventListener('click', function(e) {
+            	e.preventDefault();
+                var value = li.innerHTML;
+				console.log('click on :' + value);
+            });
+		});
+		</script>
+	</body>
+</html>
