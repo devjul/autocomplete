@@ -30,7 +30,7 @@ var test = new Autocomplete("test", {
 ## RequireJS
 
 ```javascript
-
+<script>
 define(['path/autocomplete'],
 	function(autocomplete) {
         'use strict';
