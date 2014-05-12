@@ -29,3 +29,13 @@ var test = new Autocomplete("test", {
 
 ## RequireJS
 
+```javascript
+
+define(['path/autocomplete'],
+	function(autocomplete) {
+        'use strict';
+        var autocomplete = new autocomplete();
+    }
+);
+</script>
+```    

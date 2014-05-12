@@ -41,9 +41,12 @@
             elements: {},
             resultList: false,
             resultClassName: 'result',
+            inputName: 'keyword',
             delayCheck: 300,
             minChars: 3,
-            killerFn: true
+            killerFn: true,
+            cacheResult: true,
+            cacheTimeValid: 24 * 60 * 60 * 1000
         };
 
         this.customFunctions = false;
@@ -57,6 +60,7 @@
             this.options[item] = options[item];
         }.bind(this));
 
+        // TODO: search better
         this.elementsList = [].slice.call(this.options.elements);
 
         nextTick(function() {
@@ -69,7 +73,7 @@
 
         this.createResultList();
 
-        this.elementsList.forEach(function(item) { 
+        this.elementsList.forEach(function(item) {
             this.addEvents(item);
         }.bind(this));
     };
@@ -89,13 +93,20 @@
     };
 
     Autocomplete.prototype.addEvents = function(item) {
-        item.addEventListener('keypress', function(e) {
-            this.inputActive = item;
-            clearTimeout(this.timeoutFn);
-            this.timeoutFn = setTimeout(function() {
-                this.checkNeedSuggest(item, e);
-            }.bind(this), this.options.delayCheck);
-        }.bind(this));
+        if (item.getAttribute('contenteditable')) {
+            window.addEventListener('keydown', function(e) {
+                console.log(e);
+            });
+        }
+        else {
+            item.addEventListener('keydown', function(e) {
+                this.inputActive = item;
+                clearTimeout(this.timeoutFn);
+                this.timeoutFn = setTimeout(function() {
+                    this.checkNeedSuggest(item, e);
+                }.bind(this), this.options.delayCheck);
+            }.bind(this));
+        }
     };
 
     Autocomplete.prototype.checkNeedSuggest = function(item, key) {
@@ -103,24 +114,52 @@
         if (item.value) {
             value = item.value;
         }
-        else {
-            // TODO: Contenteditable support
-            return;
-        }
 
-        if (value && value.length >= this.options.minChars && value !== this.lastCheck) {
+        if (value && value.length >= this.options.minChars) {
             this.lastCheck = value;
-            this.checkSuggest(this.lastCheck);
+            this.checkSuggest();
             return;
         }
 
         this.resultList.style.display = 'none';
     };
 
-    Autocomplete.prototype.checkSuggest = function(value) {
-        ajaxLoad(this.urlService, function(result) {
+    Autocomplete.prototype.checkSuggest = function() {
+        var key = 'result_' + this.lastCheck;
+        if (this.options.cacheResult && window.localStorage) {
+            var cached = JSON.parse(window.localStorage.getItem(key));
+            if (cached !== null) {
+                var now = Date.now();
+                if (now < cached.timeStamp + this.options.cacheTimeValid) {
+                    this.showResult(cached.result);
+                    return;
+                }
+                window.localStorage.removeItem(key);
+            }
+        }
+        ajaxLoad(this.urlService + '? ' + this.options.inputName + '=' + this.lastCheck, function(result) {
             this.showResult(result);
+            if (this.options.cacheResult && window.localStorage) {
+                this.storeResult(result);
+            }
+            this.lastCheck = '';
         }.bind(this));
+    };
+
+    Autocomplete.prototype.storeResult = function(result) {
+        var key = 'result_' + this.lastCheck;
+        var timeStamp = Date.now();
+
+        var storage = JSON.parse(window.localStorage.getItem(key));
+        var objCache = {};
+        if (storage !== null) {
+            objCache = storage;
+        }
+
+        objCache.timeStamp = timeStamp;
+        objCache.result = result;
+
+        window.localStorage.setItem(key, JSON.stringify(objCache));
     };
 
     Autocomplete.prototype.showResult = function(result) {
