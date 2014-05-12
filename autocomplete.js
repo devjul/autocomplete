@@ -24,7 +24,7 @@
 
         var oReq = new XMLHttpRequest();
         oReq.onload = reqListener;
-        oReq.open("get", url, true);
+        oReq.open('get', url, true);
         oReq.send();
     };
 
@@ -84,7 +84,7 @@
             return;
         }
 
-        this.resultList = document.createElement("ul");
+        this.resultList = document.createElement('ul');
         if (typeof (this.options.resultClassName) === 'string') {
             this.resultList.classList.add(this.options.resultClassName);
         }
@@ -201,7 +201,7 @@
     };
 
     Autocomplete.prototype.addResponse = function(item) {
-        var li = document.createElement("li");
+        var li = document.createElement('li');
         if (this.customFunctions) {
             this.customFunctions(li, item);
         }
